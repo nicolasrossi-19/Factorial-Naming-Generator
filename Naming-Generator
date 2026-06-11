@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Naming Generator · Factorial Video</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+
+    .wrap { max-width: 520px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+
+    /* Header */
+    .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 2rem; }
+    .header-eyebrow { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.25rem; }
+    .header-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
+    .header-wip { font-size: 0.7rem; color: #404040; margin-top: 0.25rem; }
+    .type-pill { font-size: 0.65rem; font-weight: 500; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid; white-space: nowrap; transition: all 0.3s; }
+
+    /* Output */
+    .output-box { border-radius: 1rem; border: 1px solid #262626; padding: 1.5rem; background: rgba(23,23,23,0.5); margin-bottom: 1.5rem; transition: all 0.4s; }
+    .output-box.active { background: #171717; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.75rem; }
+    .output-name { font-family: "SF Mono", "Fira Code", monospace; font-size: 1.05rem; color: #fff; word-break: break-all; line-height: 1.6; transition: opacity 0.15s, transform 0.15s; }
+    .output-name.animating { opacity: 0; transform: translateY(4px); }
+    .output-dash { font-family: monospace; color: #404040; font-size: 1rem; margin-bottom: 0.75rem; }
+    .missing-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .missing-pill { font-size: 0.65rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: #1c1c1c; color: #525252; border: 1px solid #262626; }
+    .copy-btn { margin-top: 1rem; width: 100%; padding: 0.65rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
+    .copy-btn.done { background: #262626; color: #737373; }
+
+    /* Form */
+    .section { margin-bottom: 1.25rem; }
+    .field-label { display: block; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: #737373; margin-bottom: 0.5rem; }
+    .field-label span { text-transform: none; letter-spacing: normal; color: #404040; font-weight: 400; }
+
+    .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .btn-grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 0.35rem; }
+    .btn-row { display: flex; gap: 0.5rem; }
+    .btn-half { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    .tog-btn { flex: 1; padding: 0.5rem 0.25rem; border-radius: 0.5rem; font-size: 0.8rem; font-weight: 500; border: 1px solid; background: transparent; cursor: pointer; transition: all 0.2s; color: inherit; }
+    .tog-btn.q { font-size: 0.7rem; }
+
+    input[type=number], input[type=text] {
+      width: 100%; background: #111; border: 1px solid #262626; color: #fff;
+      border-radius: 0.5rem; padding: 0.6rem 0.75rem; font-size: 0.875rem;
+      outline: none; transition: border-color 0.2s;
+    }
+    input[type=number]:focus, input[type=text]:focus { border-color: #525252; }
+    input::placeholder { color: #404040; }
+    input[type=number] { width: 100%; }
+
+    .hyphen-preview { font-size: 0.7rem; color: #525252; margin-top: 0.4rem; }
+    .hyphen-preview span { color: #d4d4d4; font-family: monospace; }
+
+    /* History */
+    .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; margin-bottom: 0.75rem; }
+    .history-item { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; background: #111; border: 1px solid #1c1c1c; border-radius: 0.75rem; padding: 0.75rem 1rem; margin-bottom: 0.5rem; }
+    .history-name { font-family: monospace; font-size: 0.7rem; color: #737373; word-break: break-all; line-height: 1.5; flex: 1; }
+    .history-copy { flex-shrink: 0; font-size: 0.7rem; padding: 0.3rem 0.75rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; }
+    .history-copy:hover { border-color: #525252; color: #fff; }
+    .history-copy.done { background: #1c1c1c; color: #525252; }
+
+    /* Color tokens */
+    /* SEO - blue */
+    .c-SEO-active   { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .c-SEO-inactive { border-color: rgba(59,130,246,0.3); color: #60a5fa; }
+    .c-SEO-inactive:hover { border-color: #60a5fa; }
+    .c-SEO-pill     { background: rgba(59,130,246,0.12); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+    .c-SEO-border   { border-color: rgba(59,130,246,0.3) !important; }
+    .c-SEO-glow     { box-shadow: 0 25px 50px -12px rgba(59,130,246,0.2); }
+
+    /* IGC - violet */
+    .c-IGC-active   { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
+    .c-IGC-inactive { border-color: rgba(139,92,246,0.3); color: #a78bfa; }
+    .c-IGC-inactive:hover { border-color: #a78bfa; }
+    .c-IGC-pill     { background: rgba(139,92,246,0.12); color: #a78bfa; border-color: rgba(139,92,246,0.3); }
+    .c-IGC-border   { border-color: rgba(139,92,246,0.3) !important; }
+    .c-IGC-glow     { box-shadow: 0 25px 50px -12px rgba(139,92,246,0.2); }
+
+    /* PLWC - emerald */
+    .c-PLWC-active   { background: #10b981; color: #fff; border-color: #10b981; }
+    .c-PLWC-inactive { border-color: rgba(16,185,129,0.3); color: #34d399; }
+    .c-PLWC-inactive:hover { border-color: #34d399; }
+    .c-PLWC-pill     { background: rgba(16,185,129,0.12); color: #34d399; border-color: rgba(16,185,129,0.3); }
+    .c-PLWC-border   { border-color: rgba(16,185,129,0.3) !important; }
+    .c-PLWC-glow     { box-shadow: 0 25px 50px -12px rgba(16,185,129,0.2); }
+
+    /* SoMe - pink */
+    .c-SoMe-active   { background: #ec4899; color: #fff; border-color: #ec4899; }
+    .c-SoMe-inactive { border-color: rgba(236,72,153,0.3); color: #f472b6; }
+    .c-SoMe-inactive:hover { border-color: #f472b6; }
+    .c-SoMe-pill     { background: rgba(236,72,153,0.12); color: #f472b6; border-color: rgba(236,72,153,0.3); }
+    .c-SoMe-border   { border-color: rgba(236,72,153,0.3) !important; }
+    .c-SoMe-glow     { box-shadow: 0 25px 50px -12px rgba(236,72,153,0.2); }
+
+    /* AI ACT - amber */
+    .c-AIACT-active   { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+    .c-AIACT-inactive { border-color: rgba(245,158,11,0.3); color: #fbbf24; }
+    .c-AIACT-inactive:hover { border-color: #fbbf24; }
+    .c-AIACT-pill     { background: rgba(245,158,11,0.12); color: #fbbf24; border-color: rgba(245,158,11,0.3); }
+    .c-AIACT-border   { border-color: rgba(245,158,11,0.3) !important; }
+    .c-AIACT-glow     { box-shadow: 0 25px 50px -12px rgba(245,158,11,0.2); }
+
+    /* Screen Studio - cyan */
+    .c-SS-active   { background: #06b6d4; color: #fff; border-color: #06b6d4; }
+    .c-SS-inactive { border-color: rgba(6,182,212,0.3); color: #22d3ee; }
+    .c-SS-inactive:hover { border-color: #22d3ee; }
+    .c-SS-pill     { background: rgba(6,182,212,0.12); color: #22d3ee; border-color: rgba(6,182,212,0.3); }
+    .c-SS-border   { border-color: rgba(6,182,212,0.3) !important; }
+    .c-SS-glow     { box-shadow: 0 25px 50px -12px rgba(6,182,212,0.2); }
+
+    /* Default */
+    .c-default-active   { background: #fff; color: #0a0a0a; border-color: #fff; }
+    .c-default-inactive { border-color: #262626; color: #737373; }
+    .c-default-inactive:hover { border-color: #525252; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useEffect, useRef } = React;
+
+const TYPES = ["SEO", "IGC", "PLWC", "SoMe", "AI ACT", "Screen Studio"];
+const MARKETS = ["ES", "PT", "FR", "DE", "IT", "ROW"];
+const FORMATS = ["YTB", "IG", "LinkedIn"];
+const IGC_FORMATS = ["LG", "MF", "SF", "PAID"];
+const FUNNELS = ["TOFU", "MOFU", "BOFU"];
+const QUARTERS = ["Q1", "Q2", "Q3", "Q4"];
+const QUARTER_TYPES = ["SEO", "PLWC"];
+const TYPE_OUTPUT = { "Screen Studio": "SS" };
+
+function typeKey(t) {
+  if (t === "AI ACT") return "AIACT";
+  if (t === "Screen Studio") return "SS";
+  return t;
+}
+
+function pad(n) { return String(n).padStart(2, "0"); }
+function hyphenate(s) { return s.trim().replace(/\s+/g, "-"); }
+
+function useAnimated(value) {
+  const [displayed, setDisplayed] = useState(value);
+  const [anim, setAnim] = useState(false);
+  const prev = useRef(value);
+  useEffect(() => {
+    if (value !== prev.current) {
+      setAnim(true);
+      const t = setTimeout(() => { setDisplayed(value); setAnim(false); prev.current = value; }, 150);
+      return () => clearTimeout(t);
+    }
+  }, [value]);
+  return { displayed, anim };
+}
+
+function App() {
+  const [type, setType] = useState("");
+  const [market, setMarket] = useState("");
+  const [format, setFormat] = useState("");
+  const [funnel, setFunnel] = useState("");
+  const [quarter, setQuarter] = useState("Q2");
+  const [idNum, setIdNum] = useState("1");
+  const [title, setTitle] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [history, setHistory] = useState([]);
+
+  const hasQuarter = QUARTER_TYPES.includes(type);
+  const hasFunnel = type === "SEO";
+  const isIGC = type === "IGC";
+  const ck = type ? typeKey(type) : null;
+
+  function handleType(t) { setType(t); setFunnel(""); setFormat(""); }
+
+  function buildName() {
+    if (!type || !market || !format) return null;
+    const id = hasQuarter ? `${quarter}-${pad(parseInt(idNum)||1)}` : pad(parseInt(idNum)||1);
+    const t = title.trim() ? hyphenate(title) : "title-here";
+    const out = TYPE_OUTPUT[type] || type;
+    const parts = [out, market];
+    if (hasFunnel && funnel) parts.push(funnel);
+    parts.push(`${id}_${t}`);
+    parts.push(format);
+    return parts.join("_");
+  }
+
+  const name = buildName();
+  const { displayed, anim } = useAnimated(name);
+
+  const missing = [];
+  if (!type) missing.push("type");
+  if (!market) missing.push("market");
+  if (!format) missing.push("format");
+
+  function doCopy(n) {
+    navigator.clipboard.writeText(n).then(() => {
+      setCopied(n);
+      if (n === name && !history.includes(n)) setHistory(h => [n, ...h].slice(0, 5));
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  function activeClass(val, cur) { return val === cur ? `c-${ck||"default"}-active` : `c-${ck||"default"}-inactive`; }
+
+  function Btn({ value, current, onChange, small, forceKey }) {
+    const k = forceKey || ck || "default";
+    const isActive = value === current;
+    return React.createElement("button", {
+      className: `tog-btn ${small?"q":""} ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
+      onClick: () => onChange(current === value ? "" : value)
+    }, value);
+  }
+
+  return React.createElement("div", { className: "wrap" },
+
+    // Header
+    React.createElement("div", { className: "header" },
+      React.createElement("div", null,
+        React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
+        React.createElement("h1", { className: "header-title" }, "Naming Generator"),
+        React.createElement("p", { className: "header-wip" }, "Work in progress · versión de prueba")
+      ),
+      type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
+    ),
+
+    // Output hero
+    React.createElement("div", {
+      className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
+    },
+      React.createElement("p", { className: "output-label" }, "Output"),
+      name
+        ? React.createElement(React.Fragment, null,
+            React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
+            React.createElement("button", {
+              className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
+              onClick: () => doCopy(name)
+            }, copied === name ? "Copied ✓" : "Copy")
+          )
+        : React.createElement("div", null,
+            React.createElement("p", { className: "output-dash" }, "––"),
+            missing.length > 0 && React.createElement("div", { className: "missing-pills" },
+              ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Falta: ${f}`))
+            )
+          )
+    ),
+
+    // Form
+    React.createElement("div", null,
+
+      // Type
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Type"),
+        React.createElement("div", { className: "btn-grid-3" },
+          ...TYPES.map(t => {
+            const k = typeKey(t);
+            const isActive = type === t;
+            return React.createElement("button", {
+              key: t,
+              className: `tog-btn ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
+              onClick: () => handleType(isActive ? "" : t)
+            }, t);
+          })
+        )
+      ),
+
+      // Market
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Market"),
+        React.createElement("div", { className: "btn-grid-6" },
+          ...MARKETS.map(m => React.createElement("button", {
+            key: m,
+            className: `tog-btn ${activeClass(m, market)}`,
+            onClick: () => setMarket(market === m ? "" : m)
+          }, m))
+        )
+      ),
+
+      // Funnel
+      hasFunnel && React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Funnel stage"),
+        React.createElement("div", { className: "btn-row" },
+          ...FUNNELS.map(f => React.createElement(Btn, { key: f, value: f, current: funnel, onChange: setFunnel }))
+        )
+      ),
+
+      // ID
+      React.createElement("div", { className: `section btn-half` },
+        hasQuarter && React.createElement("div", null,
+          React.createElement("label", { className: "field-label" }, "Quarter"),
+          React.createElement("div", { className: "btn-row" },
+            ...QUARTERS.map(q => React.createElement("button", {
+              key: q,
+              className: `tog-btn q ${activeClass(q, quarter)}`,
+              onClick: () => setQuarter(q)
+            }, q))
+          )
+        ),
+        React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
+          React.createElement("label", { className: "field-label" }, "ID #"),
+          React.createElement("input", {
+            type: "number", min: "1", max: "99",
+            value: idNum, placeholder: "01",
+            onChange: e => setIdNum(e.target.value)
+          })
+        )
+      ),
+
+      // Title
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" },
+          "Title ", React.createElement("span", null, "(opcional)")
+        ),
+        React.createElement("input", {
+          type: "text", value: title, placeholder: "title-here",
+          onChange: e => setTitle(e.target.value)
+        }),
+        title.trim().includes(" ") && React.createElement("p", { className: "hyphen-preview" },
+          "→ ", React.createElement("span", null, hyphenate(title))
+        )
+      ),
+
+      // Format
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
+        React.createElement("div", { className: "btn-row" },
+          ...(isIGC ? IGC_FORMATS : FORMATS).map(f => React.createElement(Btn, { key: f, value: f, current: format, onChange: setFormat }))
+        )
+      )
+    ),
+
+    // History
+    history.length > 0 && React.createElement("div", { style: { marginTop: "2rem" } },
+      React.createElement("p", { className: "history-label" }, "Historial"),
+      ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
+        React.createElement("p", { className: "history-name" }, h),
+        React.createElement("button", {
+          className: `history-copy ${copied === h ? "done" : ""}`,
+          onClick: () => doCopy(h)
+        }, copied === h ? "✓" : "Copy")
+      ))
+    )
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
