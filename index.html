@@ -195,16 +195,27 @@ function App() {
   if (!format) missing.push("format");
 
   function doCopy(n) {
-  const ta = document.createElement("textarea");
-  ta.value = n;
-  ta.style.position = "fixed";
-  ta.style.opacity = "0";
-  document.body.appendChild(ta);
-  ta.select();
-  try {
-    document.execCommand("copy");
-  } catch (e) {}
-  document.body.removeChild(ta);
+  function fallbackSelect() {
+    const range = document.createRange();
+    const node = document.createElement("span");
+    node.textContent = n;
+    node.style.position = "fixed";
+    node.style.opacity = "0";
+    document.body.appendChild(node);
+    range.selectNode(node);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    try { document.execCommand("copy"); } catch (e) {}
+    sel.removeAllRanges();
+    document.body.removeChild(node);
+  }
+
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(n).catch(() => fallbackSelect());
+  } else {
+    fallbackSelect();
+  }
 
   setCopied(n);
   if (n === name && !history.includes(n)) setHistory(h => [n, ...h].slice(0, 5));
