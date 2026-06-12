@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -25,7 +25,7 @@
       border-radius: 1.5rem;
     }
     
-    /* Glow colors por type - usando box-shadow */
+    /* Glow colors by type */
     .wrap-glow.glow-SEO {
       box-shadow: inset 0 0 40px rgba(59,130,246,0.1), inset 0 -20px 40px rgba(59,130,246,0.08);
     }
@@ -60,9 +60,6 @@
     /* Output */
     .output-box { border-radius: 1rem; border: 1px solid #262626; padding: 1rem; background: rgba(23,23,23,0.5); margin-bottom: 1rem; transition: all 0.4s; position: relative; z-index: 1; }
     .output-box.active { background: rgba(20,20,20,0.7); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    
-    /* Glow específico por tipo - removido para usar glow global */
-    
     .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.5rem; }
     .output-name { 
       font-family: "SF Mono", "Fira Code", monospace; 
@@ -426,156 +423,156 @@ function App() {
   }
 
   return React.createElement("div", { className: "wrap" },
-    
+
     // Glow layer
     React.createElement("div", { className: `wrap-glow ${type ? `glow-${typeKey(type)}` : ""}` }),
     
     // Content wrapper
     React.createElement("div", { className: "wrap-content" },
 
-    // Header
-    React.createElement("div", { className: "header" },
-      React.createElement("div", null,
-        React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
-        React.createElement("h1", { className: "header-title" }, "Naming Generator"),
-        React.createElement("p", { className: "header-wip" }, "Work in progress · versión de prueba")
-      ),
-      type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
-    ),
-
-    // Form (PRIMERO)
-    React.createElement("div", null,
-
-      // Type
-      React.createElement("div", { className: "section" },
-        React.createElement("label", { className: "field-label" }, "Type"),
-        React.createElement("div", { className: "btn-grid-3" },
-          ...TYPES.map(t => {
-            const k = typeKey(t);
-            const isActive = type === t;
-            return React.createElement("button", {
-              key: t,
-              className: `tog-btn ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
-              onClick: () => handleType(isActive ? "" : t)
-            }, t);
-          })
-        )
-      ),
-
-      // Market
-      React.createElement("div", { className: "section" },
-        React.createElement("label", { className: "field-label" }, "Market"),
-        React.createElement("div", { className: "btn-grid-6" },
-          ...MARKETS.map(m => React.createElement("button", {
-            key: m,
-            className: `tog-btn ${activeClass(m, market)}`,
-            onClick: () => setMarket(market === m ? "" : m)
-          }, m))
-        )
-      ),
-
-      // Funnel
-      hasFunnel && React.createElement("div", { className: "section" },
-        React.createElement("label", { className: "field-label" }, "Funnel stage"),
-        React.createElement("div", { className: "btn-row" },
-          ...FUNNELS.map(f => React.createElement(Btn, { key: f, value: f, current: funnel, onChange: setFunnel }))
-        )
-      ),
-
-      // ID
-      React.createElement("div", { className: `section btn-half` },
-        hasQuarter && React.createElement("div", null,
-          React.createElement("label", { className: "field-label" }, "Quarter"),
-          React.createElement("div", { className: "btn-row" },
-            ...QUARTERS.map(q => React.createElement("button", {
-              key: q,
-              className: `tog-btn q ${activeClass(q, quarter)}`,
-              onClick: () => setQuarter(q)
-            }, q))
-          )
+      // Header
+      React.createElement("div", { className: "header" },
+        React.createElement("div", null,
+          React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
+          React.createElement("h1", { className: "header-title" }, "Naming Generator"),
+          React.createElement("p", { className: "header-wip" }, "Beta v0.2")
         ),
-        React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
-          React.createElement("label", { className: "field-label" }, "ID #"),
-          React.createElement("input", {
-            type: "number", min: "1", max: "99",
-            value: idNum, placeholder: "01",
-            onChange: e => setIdNum(e.target.value)
-          })
-        )
+        type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
       ),
 
-      // Title
-      React.createElement("div", { className: "section" },
-        React.createElement("label", { className: "field-label" },
-          "Title ", React.createElement("span", null, "(opcional)")
-        ),
-        React.createElement("input", {
-          type: "text", value: title, placeholder: "title-here",
-          onChange: e => setTitle(e.target.value)
-        }),
-        title.trim().includes(" ") && React.createElement("p", { className: "hyphen-preview" },
-          "→ ", React.createElement("span", null, hyphenate(title))
-        )
-      ),
-
-      // Format
-      React.createElement("div", { className: "section" },
-        React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
-        React.createElement("div", { className: "btn-row" },
-          ...(isIGC ? IGC_FORMATS : FORMATS).map(f => React.createElement(Btn, { key: f, value: f, current: format, onChange: setFormat }))
-        )
-      )
-    ),
-
-    // Output hero (AL FINAL, ANTES DEL HISTORIAL)
-    React.createElement("div", {
-      className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
-    },
-      React.createElement("p", { className: "output-label" }, "Output"),
-      name
-        ? React.createElement(React.Fragment, null,
-            React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
-            React.createElement("button", {
-              className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
-              onClick: () => doCopy(name)
-            }, copied === name ? "Copied ✓" : "Copy")
-          )
-        : React.createElement("div", null,
-            React.createElement("p", { className: "output-dash" }, "––"),
-            missing.length > 0 && React.createElement("div", { className: "missing-pills" },
-              ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Falta: ${f}`))
-            )
-          )
-    ),
-
-    // History (COLAPSADO POR DEFECTO)
-    history.length > 0 && React.createElement("div", { className: "history-container" },
-      React.createElement("button", {
-        className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
-        onClick: () => setHistoryExpanded(!historyExpanded)
+      // Output hero
+      React.createElement("div", {
+        className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
       },
-        React.createElement("div", { className: "history-toggle-label" },
-          React.createElement("span", { className: "history-label" }, `Historial (${history.length})`),
-          React.createElement("span", { className: "history-toggle-icon" }, "▼")
-        ),
-        React.createElement("button", {
-          className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
-          onClick: (e) => {
-            e.stopPropagation();
-            clearHistoryConfirm();
-          }
-        }, clearConfirm ? "¿Seguro?" : "Limpiar")
+        React.createElement("p", { className: "output-label" }, "Output"),
+        name
+          ? React.createElement(React.Fragment, null,
+              React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
+              React.createElement("button", {
+                className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
+                onClick: () => doCopy(name)
+              }, copied === name ? "Copied ✓" : "Copy")
+            )
+          : React.createElement("div", null,
+              React.createElement("p", { className: "output-dash" }, "––"),
+              missing.length > 0 && React.createElement("div", { className: "missing-pills" },
+                ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Missing: ${f}`))
+              )
+            )
       ),
-      React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
-        ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
-          React.createElement("p", { className: "history-name" }, h),
+
+      // Form
+      React.createElement("div", null,
+
+        // Type
+        React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" }, "Type"),
+          React.createElement("div", { className: "btn-grid-3" },
+            ...TYPES.map(t => {
+              const k = typeKey(t);
+              const isActive = type === t;
+              return React.createElement("button", {
+                key: t,
+                className: `tog-btn ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
+                onClick: () => handleType(isActive ? "" : t)
+              }, t);
+            })
+          )
+        ),
+
+        // Market
+        React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" }, "Market"),
+          React.createElement("div", { className: "btn-grid-6" },
+            ...MARKETS.map(m => React.createElement("button", {
+              key: m,
+              className: `tog-btn ${activeClass(m, market)}`,
+              onClick: () => setMarket(market === m ? "" : m)
+            }, m))
+          )
+        ),
+
+        // Funnel
+        hasFunnel && React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" }, "Funnel Stage"),
+          React.createElement("div", { className: "btn-row" },
+            ...FUNNELS.map(f => React.createElement(Btn, { key: f, value: f, current: funnel, onChange: setFunnel }))
+          )
+        ),
+
+        // ID
+        React.createElement("div", { className: `section btn-half` },
+          hasQuarter && React.createElement("div", null,
+            React.createElement("label", { className: "field-label" }, "Quarter"),
+            React.createElement("div", { className: "btn-row" },
+              ...QUARTERS.map(q => React.createElement("button", {
+                key: q,
+                className: `tog-btn q ${activeClass(q, quarter)}`,
+                onClick: () => setQuarter(q)
+              }, q))
+            )
+          ),
+          React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
+            React.createElement("label", { className: "field-label" }, "ID #"),
+            React.createElement("input", {
+              type: "number", min: "1", max: "99",
+              value: idNum, placeholder: "01",
+              onChange: e => setIdNum(e.target.value)
+            })
+          )
+        ),
+
+        // Title
+        React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" },
+            "Title ", React.createElement("span", null, "(optional)")
+          ),
+          React.createElement("input", {
+            type: "text", value: title, placeholder: "title-here",
+            onChange: e => setTitle(e.target.value)
+          }),
+          title.trim().includes(" ") && React.createElement("p", { className: "hyphen-preview" },
+            "→ ", React.createElement("span", null, hyphenate(title))
+          )
+        ),
+
+        // Format
+        React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
+          React.createElement("div", { className: "btn-row" },
+            ...(isIGC ? IGC_FORMATS : FORMATS).map(f => React.createElement(Btn, { key: f, value: f, current: format, onChange: setFormat }))
+          )
+        )
+      ),
+
+      // History (AT THE END)
+      history.length > 0 && React.createElement("div", { className: "history-container" },
+        React.createElement("button", {
+          className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
+          onClick: () => setHistoryExpanded(!historyExpanded)
+        },
+          React.createElement("div", { className: "history-toggle-label" },
+            React.createElement("span", { className: "history-label" }, `History (${history.length})`),
+            React.createElement("span", { className: "history-toggle-icon" }, "▼")
+          ),
           React.createElement("button", {
-            className: `history-copy ${copied === h ? "done" : ""}`,
-            onClick: () => doCopy(h)
-          }, copied === h ? "✓" : "Copy")
-        ))
+            className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
+            onClick: (e) => {
+              e.stopPropagation();
+              clearHistoryConfirm();
+            }
+          }, clearConfirm ? "Sure?" : "Clear")
+        ),
+        React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
+          ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
+            React.createElement("p", { className: "history-name" }, h),
+            React.createElement("button", {
+              className: `history-copy ${copied === h ? "done" : ""}`,
+              onClick: () => doCopy(h)
+            }, copied === h ? "✓" : "Copy")
+          ))
+        )
       )
-    )
     ) // Cierre de wrap-content
   );
 }
