@@ -217,7 +217,7 @@ const { useState, useEffect, useRef } = React;
 
 const TYPES = ["SEO", "IGC", "PLWC", "SoMe", "AI ACT", "Screen Studio"];
 const MARKETS = ["ES", "PT", "FR", "DE", "IT", "ROW"];
-const SHEET_URL = "https://script.google.com/a/macros/factorial.co/s/AKfycbxdz0CXjEUvZpAWP3Jl-i6veDbcwpCoiVbjzW8wGIMBormB6mdK9ulX0iDzE77nWmuY/exec";
+const SHEET_URL = "https://script.google.com/a/macros/factorial.co/s/AKfycbxtqiu4jeviAlHezAhowcZEGW0Z-WNJZjooqRDqzVLmmskQIf8oqtNtAxSB06ELbNdV/exec";
 const FORMATS = ["YTB", "IG", "LinkedIn"];
 const IGC_FORMATS = ["LG", "MF", "SF", "PAID"];
 const FUNNELS = ["TOFU", "MOFU", "BOFU"];
@@ -302,13 +302,16 @@ function App() {
   if (!format) missing.push("format");
 
   function syncToSheet(n) {
-    const payload = new FormData();
+    const payload = new URLSearchParams();
     payload.append("name", n);
     
     fetch(SHEET_URL, {
       method: "POST",
       body: payload
-    }).catch(err => console.log("Sheet sync error (non-critical):", err));
+    })
+    .then(r => r.json())
+    .then(data => console.log("Sheet sync OK:", data))
+    .catch(err => console.log("Sheet sync error (non-critical):", err));
   }
 
   function doCopy(n) {
