@@ -59,34 +59,90 @@
     /* History */
     .history-container { 
       margin-top: 1rem; 
-      max-height: 300px; 
-      overflow-y: auto; 
+    }
+    
+    .history-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #111;
+      border: 1px solid #262626;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #737373;
+      border: none;
+      width: 100%;
+    }
+    
+    .history-toggle:hover {
+      border-color: #525252;
+      color: #fff;
+    }
+    
+    .history-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+    
+    .history-toggle-icon {
+      display: inline-block;
+      transition: transform 0.3s;
+      font-size: 0.7rem;
+    }
+    
+    .history-toggle.expanded .history-toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    .history-list {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.3s;
+      opacity: 0;
+    }
+    
+    .history-list.expanded {
+      display: block;
+      max-height: 400px;
+      opacity: 1;
+      margin-top: 0.5rem;
+      overflow-y: auto;
       padding-right: 6px;
     }
     
     /* Scroll styling - WebKit (Chrome, Safari, Edge) */
-    .history-container::-webkit-scrollbar {
+    .history-list::-webkit-scrollbar {
       width: 6px;
     }
-    .history-container::-webkit-scrollbar-track {
+    .history-list::-webkit-scrollbar-track {
       background: transparent;
     }
-    .history-container::-webkit-scrollbar-thumb {
+    .history-list::-webkit-scrollbar-thumb {
       background: linear-gradient(180deg, #8b5cf6 0%, #3b82f6 100%);
       border-radius: 3px;
       transition: background 0.3s;
     }
-    .history-container::-webkit-scrollbar-thumb:hover {
+    .history-list::-webkit-scrollbar-thumb:hover {
       background: linear-gradient(180deg, #a78bfa 0%, #60a5fa 100%);
     }
     
     /* Firefox */
-    .history-container {
+    .history-list {
       scrollbar-color: #8b5cf6 transparent;
       scrollbar-width: thin;
     }
     
-    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    .history-header { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
     .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; }
     .clear-history-btn { font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
     .clear-history-btn:hover { border-color: #525252; color: #fff; }
@@ -202,6 +258,7 @@ function App() {
   const [title, setTitle] = useState("");
   const [copied, setCopied] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem("naming-history");
@@ -425,22 +482,33 @@ function App() {
           )
     ),
 
-    // History (AL FINAL)
+    // History (COLAPSADO POR DEFECTO)
     history.length > 0 && React.createElement("div", { className: "history-container" },
-      React.createElement("div", { className: "history-header" },
-        React.createElement("p", { className: "history-label" }, "Historial"),
+      React.createElement("button", {
+        className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
+        onClick: () => setHistoryExpanded(!historyExpanded)
+      },
+        React.createElement("div", { className: "history-toggle-label" },
+          React.createElement("span", { className: "history-label" }, `Historial (${history.length})`),
+          React.createElement("span", { className: "history-toggle-icon" }, "▼")
+        ),
         React.createElement("button", {
           className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
-          onClick: clearHistoryConfirm
+          onClick: (e) => {
+            e.stopPropagation();
+            clearHistoryConfirm();
+          }
         }, clearConfirm ? "¿Seguro?" : "Limpiar")
       ),
-      ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
-        React.createElement("p", { className: "history-name" }, h),
-        React.createElement("button", {
-          className: `history-copy ${copied === h ? "done" : ""}`,
-          onClick: () => doCopy(h)
-        }, copied === h ? "✓" : "Copy")
-      ))
+      React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
+        ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
+          React.createElement("p", { className: "history-name" }, h),
+          React.createElement("button", {
+            className: `history-copy ${copied === h ? "done" : ""}`,
+            onClick: () => doCopy(h)
+          }, copied === h ? "✓" : "Copy")
+        ))
+      )
     )
   );
 }
