@@ -126,6 +126,7 @@ const { useState, useEffect, useRef } = React;
 
 const TYPES = ["SEO", "IGC", "PLWC", "SoMe", "AI ACT", "Screen Studio"];
 const MARKETS = ["ES", "PT", "FR", "DE", "IT", "ROW"];
+const SHEET_URL = "https://script.google.com/a/macros/factorial.co/s/AKfycbxdz0CXjEUvZpAWP3Jl-i6veDbcwpCoiVbjzW8wGIMBormB6mdK9ulX0iDzE77nWmuY/exec";
 const FORMATS = ["YTB", "IG", "LinkedIn"];
 const IGC_FORMATS = ["LG", "MF", "SF", "PAID"];
 const FUNNELS = ["TOFU", "MOFU", "BOFU"];
@@ -178,6 +179,15 @@ function App() {
     localStorage.setItem("naming-history", JSON.stringify(history));
   } catch (e) {}
 }, [history]);
+  
+  useEffect(() => {
+  fetch(SHEET_URL)
+    .then(r => r.json())
+    .then(data => {
+      if (data.names) setHistory(data.names.slice(0, 5));
+    })
+    .catch(() => {});
+}, []);
 
   const hasQuarter = QUARTER_TYPES.includes(type);
   const hasFunnel = type === "SEO";
@@ -230,6 +240,13 @@ function App() {
   }
 
   setCopied(n);
+  if (n === name) {
+  fetch(SHEET_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify({ name: n })
+  }).catch(() => {});
+}
   if (n === name && !history.includes(n)) setHistory(h => [n, ...h].slice(0, 5));
   setTimeout(() => setCopied(false), 2000);
 }
@@ -363,7 +380,7 @@ function App() {
     ),
 
     // History
-    history.length > 0 && React.createElement("div", { style: { marginTop: "2rem" } },
+    history.length > 0 && React.createElement("div", { style: { marginTop: "2rem", maxHeight: "260px", overflowY: "auto", paddingRight: "4px" } },
       React.createElement("p", { className: "history-label" }, "Historial"),
       ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
         React.createElement("p", { className: "history-name" }, h),
