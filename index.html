@@ -57,7 +57,7 @@
     .hyphen-preview span { color: #d4d4d4; font-family: monospace; }
 
     /* History */
-    .history-container { margin-top: 2rem; max-height: 260px; overflow-y: auto; padding-right: 4px; }
+    .history-container { margin-top: 2rem; }
     .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
     .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; }
     .clear-history-btn { font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
@@ -292,28 +292,7 @@ function App() {
       type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
     ),
 
-    // Output hero
-    React.createElement("div", {
-      className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
-    },
-      React.createElement("p", { className: "output-label" }, "Output"),
-      name
-        ? React.createElement(React.Fragment, null,
-            React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
-            React.createElement("button", {
-              className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
-              onClick: () => doCopy(name)
-            }, copied === name ? "Copied ✓" : "Copy")
-          )
-        : React.createElement("div", null,
-            React.createElement("p", { className: "output-dash" }, "––"),
-            missing.length > 0 && React.createElement("div", { className: "missing-pills" },
-              ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Falta: ${f}`))
-            )
-          )
-    ),
-
-    // Form
+    // Form (PRIMERO)
     React.createElement("div", null,
 
       // Type
@@ -397,7 +376,28 @@ function App() {
       )
     ),
 
-    // History
+    // Output hero (AL FINAL, ANTES DEL HISTORIAL)
+    React.createElement("div", {
+      className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
+    },
+      React.createElement("p", { className: "output-label" }, "Output"),
+      name
+        ? React.createElement(React.Fragment, null,
+            React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
+            React.createElement("button", {
+              className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
+              onClick: () => doCopy(name)
+            }, copied === name ? "Copied ✓" : "Copy")
+          )
+        : React.createElement("div", null,
+            React.createElement("p", { className: "output-dash" }, "––"),
+            missing.length > 0 && React.createElement("div", { className: "missing-pills" },
+              ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Falta: ${f}`))
+            )
+          )
+    ),
+
+    // History (AL FINAL)
     history.length > 0 && React.createElement("div", { className: "history-container" },
       React.createElement("div", { className: "history-header" },
         React.createElement("p", { className: "history-label" }, "Historial"),
