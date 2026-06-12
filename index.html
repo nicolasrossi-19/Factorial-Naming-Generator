@@ -110,90 +110,11 @@
     /* History */
     .history-container { 
       margin-top: 1rem; 
-    }
-    
-    .history-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      background: #111;
-      border: 1px solid #262626;
-      border-radius: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.65rem;
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: #737373;
-      border: none;
-      width: 100%;
-    }
-    
-    .history-toggle:hover {
-      border-color: #525252;
-      color: #fff;
-    }
-    
-    .history-toggle-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      flex: 1;
-    }
-    
-    .history-toggle-icon {
-      display: inline-block;
-      transition: transform 0.3s;
-      font-size: 0.7rem;
-    }
-    
-    .history-toggle.expanded .history-toggle-icon {
-      transform: rotate(180deg);
-    }
-    
-    .history-list {
-      display: none;
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease-out, opacity 0.3s;
-      opacity: 0;
-    }
-    
-    .history-list.expanded {
-      display: block;
-      max-height: 120px;
-      opacity: 1;
-      margin-top: 0.5rem;
-      overflow-y: auto;
+      max-height: 300px; 
+      overflow-y: auto; 
       padding-right: 6px;
     }
-    
-    /* Scroll styling - WebKit (Chrome, Safari, Edge) */
-    .history-list::-webkit-scrollbar {
-      width: 6px;
-    }
-    .history-list::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .history-list::-webkit-scrollbar-thumb {
-      background: linear-gradient(180deg, #8b5cf6 0%, #3b82f6 100%);
-      border-radius: 3px;
-      transition: background 0.3s;
-    }
-    .history-list::-webkit-scrollbar-thumb:hover {
-      background: linear-gradient(180deg, #a78bfa 0%, #60a5fa 100%);
-    }
-    
-    /* Firefox */
-    .history-list {
-      scrollbar-color: #8b5cf6 transparent;
-      scrollbar-width: thin;
-    }
-    
-    .history-header { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
     .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; }
     .clear-history-btn { font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
     .clear-history-btn:hover { border-color: #525252; color: #fff; }
@@ -309,7 +230,6 @@ function App() {
   const [title, setTitle] = useState("");
   const [copied, setCopied] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
-  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem("naming-history");
@@ -330,26 +250,17 @@ function App() {
   const isIGC = type === "IGC";
   const ck = type ? typeKey(type) : null;
 
-  function handleType(t) { setType(t); setFunnel(""); setFormat(""); setIdNum(""); }
+  function handleType(t) { setType(t); setFunnel(""); setFormat(""); }
 
   function buildName() {
     if (!type || !market || !format) return null;
+    const id = hasQuarter ? `${quarter}-${pad(parseInt(idNum)||1)}` : pad(parseInt(idNum)||1);
     const t = title.trim() ? hyphenate(title) : "title-here";
     const out = TYPE_OUTPUT[type] || type;
     const parts = [out, market];
-    
-    if (type === "IGC") {
-      // IGC: sin ID, con versión al final
-      const version = idNum.trim() || "v00";
-      parts.push(`${t}_${format}_${version}`);
-    } else {
-      // Resto de tipos con ID
-      if (!idNum) return null;
-      const id = hasQuarter ? `${quarter}-${pad(parseInt(idNum)||1)}` : pad(parseInt(idNum)||1);
-      parts.push(`${id}_${t}`);
-      parts.push(format);
-    }
-    
+    if (hasFunnel && funnel) parts.push(funnel);
+    parts.push(`${id}_${t}`);
+    parts.push(format);
     return parts.join("_");
   }
 
@@ -360,9 +271,6 @@ function App() {
   if (!type) missing.push("type");
   if (!market) missing.push("market");
   if (!format) missing.push("format");
-  if (hasFunnel && !funnel) missing.push("funnel");
-  if (hasQuarter && !quarter) missing.push("quarter");
-  // IGC no requiere ID
 
   function syncToSheet(n) {
     const payload = new URLSearchParams();
@@ -452,27 +360,6 @@ function App() {
         type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
       ),
 
-      // Output hero
-      React.createElement("div", {
-        className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
-      },
-        React.createElement("p", { className: "output-label" }, "Output"),
-        name
-          ? React.createElement(React.Fragment, null,
-              React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
-              React.createElement("button", {
-                className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
-                onClick: () => doCopy(name)
-              }, copied === name ? "Copied ✓" : "Copy")
-            )
-          : React.createElement("div", null,
-              React.createElement("p", { className: "output-dash" }, "––"),
-              missing.length > 0 && React.createElement("div", { className: "missing-pills" },
-                ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Missing: ${f}`))
-              )
-            )
-      ),
-
       // Form
       React.createElement("div", null,
 
@@ -512,8 +399,8 @@ function App() {
           )
         ),
 
-        // ID / Version
-        (hasQuarter || (hasId && type !== "IGC")) && React.createElement("div", { className: `section btn-half` },
+        // ID
+        React.createElement("div", { className: `section btn-half` },
           hasQuarter && React.createElement("div", null,
             React.createElement("label", { className: "field-label" }, "Quarter"),
             React.createElement("div", { className: "btn-row" },
@@ -524,7 +411,7 @@ function App() {
               }, q))
             )
           ),
-          (hasId && type !== "IGC") && React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
+          React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
             React.createElement("label", { className: "field-label" }, "ID #"),
             React.createElement("input", {
               type: "number", min: "1", max: "99",
@@ -532,15 +419,6 @@ function App() {
               onChange: e => setIdNum(e.target.value)
             })
           )
-        ),
-
-        // IGC Version
-        isIGC && React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" }, "Version #"),
-          React.createElement("input", {
-            type: "text", value: idNum, placeholder: "v00",
-            onChange: e => setIdNum(e.target.value)
-          })
         ),
 
         // Title
@@ -566,33 +444,43 @@ function App() {
         )
       ),
 
-      // History (AT THE END)
+      // Output hero
+      React.createElement("div", {
+        className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
+      },
+        React.createElement("p", { className: "output-label" }, "Output"),
+        name
+          ? React.createElement(React.Fragment, null,
+              React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
+              React.createElement("button", {
+                className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
+                onClick: () => doCopy(name)
+              }, copied === name ? "Copied ✓" : "Copy")
+            )
+          : React.createElement("div", null,
+              React.createElement("p", { className: "output-dash" }, "––"),
+              missing.length > 0 && React.createElement("div", { className: "missing-pills" },
+                ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Missing: ${f}`))
+              )
+            )
+      ),
+
+      // History
       history.length > 0 && React.createElement("div", { className: "history-container" },
-        React.createElement("button", {
-          className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
-          onClick: () => setHistoryExpanded(!historyExpanded)
-        },
-          React.createElement("div", { className: "history-toggle-label" },
-            React.createElement("span", { className: "history-label" }, `History (${history.length})`),
-            React.createElement("span", { className: "history-toggle-icon" }, "▼")
-          ),
+        React.createElement("div", { className: "history-header" },
+          React.createElement("p", { className: "history-label" }, "History"),
           React.createElement("button", {
             className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
-            onClick: (e) => {
-              e.stopPropagation();
-              clearHistoryConfirm();
-            }
+            onClick: clearHistoryConfirm
           }, clearConfirm ? "Sure?" : "Clear")
         ),
-        React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
-          ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
-            React.createElement("p", { className: "history-name" }, h),
-            React.createElement("button", {
-              className: `history-copy ${copied === h ? "done" : ""}`,
-              onClick: () => doCopy(h)
-            }, copied === h ? "✓" : "Copy")
-          ))
-        )
+        ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
+          React.createElement("p", { className: "history-name" }, h),
+          React.createElement("button", {
+            className: `history-copy ${copied === h ? "done" : ""}`,
+            onClick: () => doCopy(h)
+          }, copied === h ? "✓" : "Copy")
+        ))
       )
     ) // Cierre de wrap-content
   );
