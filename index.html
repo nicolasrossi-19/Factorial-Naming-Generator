@@ -9,11 +9,11 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { background: #191919; color: #fff; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
-    
+
     @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 
     .wrap { max-width: 520px; margin: 0 auto; padding: 1.5rem 1rem 2rem; position: relative; }
-    
+
     .wrap-glow {
       position: absolute;
       top: 0;
@@ -26,8 +26,7 @@
       box-shadow: inset 0 0 40px rgba(255,255,255,0.05);
       border-radius: 1.5rem;
     }
-    
-    /* Glow colors por type - usando box-shadow */
+
     .wrap-glow.glow-SEO {
       box-shadow: inset 0 0 40px rgba(59,130,246,0.1), inset 0 -20px 40px rgba(59,130,246,0.08);
     }
@@ -46,38 +45,34 @@
     .wrap-glow.glow-SS {
       box-shadow: inset 0 0 40px rgba(6,182,212,0.1), inset 0 -20px 40px rgba(6,182,212,0.08);
     }
-    
+
     .wrap-content {
       position: relative;
       z-index: 1;
     }
 
-    /* Header */
     .header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1rem; position: relative; z-index: 1; }
     .header-eyebrow { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.25rem; }
     .header-title { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.02em; }
     .header-wip { font-size: 0.7rem; color: #404040; margin-top: 0.25rem; }
     .type-pill { font-size: 0.65rem; font-weight: 500; padding: 0.25rem 0.75rem; border-radius: 999px; border: 1px solid; white-space: nowrap; transition: all 0.3s; }
 
-    /* Output */
     .output-box { border-radius: 1rem; border: 1px solid #262626; padding: 1rem; background: rgba(23,23,23,0.5); margin-bottom: 1rem; transition: all 0.4s; position: relative; z-index: 1; }
     .output-box.active { background: rgba(20,20,20,0.7); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
-    
-    /* Glow específico por tipo - removido para usar glow global */
-    
+
     .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.5rem; }
-    .output-name { 
-      font-family: "SF Mono", "Fira Code", monospace; 
-      font-size: 0.95rem; 
-      color: #fff; 
-      word-break: break-all; 
-      line-height: 1.5; 
+    .output-name {
+      font-family: "SF Mono", "Fira Code", monospace;
+      font-size: 0.95rem;
+      color: #fff;
+      word-break: break-all;
+      line-height: 1.5;
       transition: opacity 0.15s, transform 0.15s, text-shadow 0.4s;
       position: relative;
       z-index: 1;
     }
     .output-name.animating { opacity: 0; transform: translateY(4px); }
-    
+
     .output-box.active .output-name {
       text-shadow: 0 0 20px rgba(255,255,255,0.2);
     }
@@ -87,7 +82,6 @@
     .copy-btn { margin-top: 0.5rem; width: 100%; padding: 0.5rem; border-radius: 0.75rem; font-size: 0.875rem; font-weight: 500; border: none; cursor: pointer; transition: all 0.2s; }
     .copy-btn.done { background: #262626; color: #737373; }
 
-    /* Form */
     .section { margin-bottom: 0.75rem; }
     .field-label { display: block; font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: #737373; margin-bottom: 0.5rem; }
     .field-label span { text-transform: none; letter-spacing: normal; color: #404040; font-weight: 400; }
@@ -112,11 +106,10 @@
     .hyphen-preview { font-size: 0.7rem; color: #525252; margin-top: 0.4rem; }
     .hyphen-preview span { color: #d4d4d4; font-family: monospace; }
 
-    /* History */
-    .history-container { 
-      margin-top: 1rem; 
+    .history-container {
+      margin-top: 1rem;
     }
-    
+
     .history-toggle {
       display: flex;
       align-items: center;
@@ -136,29 +129,29 @@
       border: none;
       width: 100%;
     }
-    
+
     .history-toggle:hover {
       border-color: #525252;
       color: #fff;
     }
-    
+
     .history-toggle-label {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       flex: 1;
     }
-    
+
     .history-toggle-icon {
       display: inline-block;
       transition: transform 0.3s;
       font-size: 0.7rem;
     }
-    
+
     .history-toggle.expanded .history-toggle-icon {
       transform: rotate(180deg);
     }
-    
+
     .history-list {
       display: none;
       max-height: 0;
@@ -166,17 +159,16 @@
       transition: max-height 0.3s ease-out, opacity 0.3s;
       opacity: 0;
     }
-    
+
     .history-list.expanded {
       display: block;
-      max-height: 120px;
+      max-height: 90px;
       opacity: 1;
       margin-top: 0.5rem;
       overflow-y: auto;
       padding-right: 6px;
     }
-    
-    /* Scroll styling - WebKit (Chrome, Safari, Edge) */
+
     .history-list::-webkit-scrollbar {
       width: 6px;
     }
@@ -191,13 +183,36 @@
     .history-list::-webkit-scrollbar-thumb:hover {
       background: linear-gradient(180deg, #a78bfa 0%, #60a5fa 100%);
     }
-    
-    /* Firefox */
+
     .history-list {
       scrollbar-color: #8b5cf6 transparent;
       scrollbar-width: thin;
     }
-    
+
+    .history-list.sb-SEO::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #60a5fa 0%, #3b82f6 100%); }
+    .history-list.sb-SEO::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #93c5fd 0%, #60a5fa 100%); }
+    .history-list.sb-SEO { scrollbar-color: #3b82f6 transparent; }
+
+    .history-list.sb-IGC::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 100%); }
+    .history-list.sb-IGC::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #c4b5fd 0%, #a78bfa 100%); }
+    .history-list.sb-IGC { scrollbar-color: #8b5cf6 transparent; }
+
+    .history-list.sb-PLWC::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #34d399 0%, #10b981 100%); }
+    .history-list.sb-PLWC::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #6ee7b7 0%, #34d399 100%); }
+    .history-list.sb-PLWC { scrollbar-color: #10b981 transparent; }
+
+    .history-list.sb-SoMe::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #f472b6 0%, #ec4899 100%); }
+    .history-list.sb-SoMe::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #f9a8d4 0%, #f472b6 100%); }
+    .history-list.sb-SoMe { scrollbar-color: #ec4899 transparent; }
+
+    .history-list.sb-AIACT::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 100%); }
+    .history-list.sb-AIACT::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #fcd34d 0%, #fbbf24 100%); }
+    .history-list.sb-AIACT { scrollbar-color: #f59e0b transparent; }
+
+    .history-list.sb-SS::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #22d3ee 0%, #06b6d4 100%); }
+    .history-list.sb-SS::-webkit-scrollbar-thumb:hover { background: linear-gradient(180deg, #67e8f9 0%, #22d3ee 100%); }
+    .history-list.sb-SS { scrollbar-color: #06b6d4 transparent; }
+
     .history-header { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
     .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; }
     .clear-history-btn { font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
@@ -211,8 +226,6 @@
     .history-copy:hover { border-color: #525252; color: #fff; }
     .history-copy.done { background: #1c1c1c; color: #525252; }
 
-    /* Color tokens */
-    /* SEO - blue */
     .c-SEO-active   { background: #3b82f6; color: #fff; border-color: #3b82f6; }
     .c-SEO-inactive { border-color: rgba(59,130,246,0.3); color: #60a5fa; }
     .c-SEO-inactive:hover { border-color: #60a5fa; }
@@ -220,7 +233,6 @@
     .c-SEO-border   { border-color: rgba(59,130,246,0.3) !important; }
     .c-SEO-glow     { box-shadow: 0 25px 50px -12px rgba(59,130,246,0.2); }
 
-    /* IGC - violet */
     .c-IGC-active   { background: #8b5cf6; color: #fff; border-color: #8b5cf6; }
     .c-IGC-inactive { border-color: rgba(139,92,246,0.3); color: #a78bfa; }
     .c-IGC-inactive:hover { border-color: #a78bfa; }
@@ -228,7 +240,6 @@
     .c-IGC-border   { border-color: rgba(139,92,246,0.3) !important; }
     .c-IGC-glow     { box-shadow: 0 25px 50px -12px rgba(139,92,246,0.2); }
 
-    /* PLWC - emerald */
     .c-PLWC-active   { background: #10b981; color: #fff; border-color: #10b981; }
     .c-PLWC-inactive { border-color: rgba(16,185,129,0.3); color: #34d399; }
     .c-PLWC-inactive:hover { border-color: #34d399; }
@@ -236,7 +247,6 @@
     .c-PLWC-border   { border-color: rgba(16,185,129,0.3) !important; }
     .c-PLWC-glow     { box-shadow: 0 25px 50px -12px rgba(16,185,129,0.2); }
 
-    /* SoMe - pink */
     .c-SoMe-active   { background: #ec4899; color: #fff; border-color: #ec4899; }
     .c-SoMe-inactive { border-color: rgba(236,72,153,0.3); color: #f472b6; }
     .c-SoMe-inactive:hover { border-color: #f472b6; }
@@ -244,7 +254,6 @@
     .c-SoMe-border   { border-color: rgba(236,72,153,0.3) !important; }
     .c-SoMe-glow     { box-shadow: 0 25px 50px -12px rgba(236,72,153,0.2); }
 
-    /* AI ACT - amber */
     .c-AIACT-active   { background: #f59e0b; color: #fff; border-color: #f59e0b; }
     .c-AIACT-inactive { border-color: rgba(245,158,11,0.3); color: #fbbf24; }
     .c-AIACT-inactive:hover { border-color: #fbbf24; }
@@ -252,7 +261,6 @@
     .c-AIACT-border   { border-color: rgba(245,158,11,0.3) !important; }
     .c-AIACT-glow     { box-shadow: 0 25px 50px -12px rgba(245,158,11,0.2); }
 
-    /* Screen Studio - cyan */
     .c-SS-active   { background: #06b6d4; color: #fff; border-color: #06b6d4; }
     .c-SS-inactive { border-color: rgba(6,182,212,0.3); color: #22d3ee; }
     .c-SS-inactive:hover { border-color: #22d3ee; }
@@ -260,7 +268,6 @@
     .c-SS-border   { border-color: rgba(6,182,212,0.3) !important; }
     .c-SS-glow     { box-shadow: 0 25px 50px -12px rgba(6,182,212,0.2); }
 
-    /* Default */
     .c-default-active   { background: #fff; color: #0a0a0a; border-color: #fff; }
     .c-default-inactive { border-color: #262626; color: #737373; }
     .c-default-inactive:hover { border-color: #525252; }
@@ -363,7 +370,7 @@ function App() {
     payload.append("type", type);
     payload.append("market", market);
     payload.append("format", format);
-    
+
     fetch(SHEET_URL, {
       method: "POST",
       body: payload
@@ -397,12 +404,12 @@ function App() {
     }
 
     setCopied(n);
-    
+
     if (n === name) {
       syncToSheet(n);
       if (!history.includes(n)) setHistory(h => [n, ...h].slice(0, 10));
     }
-    
+
     setTimeout(() => setCopied(false), 2000);
   }
 
@@ -428,14 +435,11 @@ function App() {
   }
 
   return React.createElement("div", { className: "wrap" },
-    
-    // Glow layer
+
     React.createElement("div", { className: `wrap-glow ${type ? `glow-${typeKey(type)}` : ""}` }),
-    
-    // Content wrapper
+
     React.createElement("div", { className: "wrap-content" },
 
-    // Header
     React.createElement("div", { className: "header" },
       React.createElement("div", null,
         React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
@@ -445,10 +449,8 @@ function App() {
       type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
     ),
 
-    // Form (PRIMERO)
     React.createElement("div", null,
 
-      // Type
       React.createElement("div", { className: "section" },
         React.createElement("label", { className: "field-label" }, "Type"),
         React.createElement("div", { className: "btn-grid-3" },
@@ -464,7 +466,6 @@ function App() {
         )
       ),
 
-      // Market
       React.createElement("div", { className: "section" },
         React.createElement("label", { className: "field-label" }, "Market"),
         React.createElement("div", { className: "btn-grid-6" },
@@ -476,7 +477,6 @@ function App() {
         )
       ),
 
-      // Funnel
       hasFunnel && React.createElement("div", { className: "section" },
         React.createElement("label", { className: "field-label" }, "Funnel stage"),
         React.createElement("div", { className: "btn-row" },
@@ -484,7 +484,6 @@ function App() {
         )
       ),
 
-      // ID
       React.createElement("div", { className: `section btn-half` },
         hasQuarter && React.createElement("div", null,
           React.createElement("label", { className: "field-label" }, "Quarter"),
@@ -506,7 +505,6 @@ function App() {
         )
       ),
 
-      // Title
       React.createElement("div", { className: "section" },
         React.createElement("label", { className: "field-label" },
           "Title ", React.createElement("span", null, "(opcional)")
@@ -520,7 +518,6 @@ function App() {
         )
       ),
 
-      // Format
       React.createElement("div", { className: "section" },
         React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
         React.createElement("div", { className: "btn-row" },
@@ -529,7 +526,6 @@ function App() {
       )
     ),
 
-    // Output hero (AL FINAL, ANTES DEL HISTORIAL)
     React.createElement("div", {
       className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
     },
@@ -550,7 +546,6 @@ function App() {
           )
     ),
 
-    // History (COLAPSADO POR DEFECTO)
     history.length > 0 && React.createElement("div", { className: "history-container" },
       React.createElement("button", {
         className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
@@ -568,7 +563,7 @@ function App() {
           }
         }, clearConfirm ? "Sure?" : "Clear")
       ),
-      React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
+      React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""} ${ck ? `sb-${ck}` : ""}` },
         ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
           React.createElement("p", { className: "history-name" }, h),
           React.createElement("button", {
@@ -578,7 +573,7 @@ function App() {
         ))
       )
     )
-    ) // Cierre de wrap-content
+    )
   );
 }
 
