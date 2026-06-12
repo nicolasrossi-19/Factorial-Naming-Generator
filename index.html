@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,7 +8,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #191919; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+    body { background: #191919; color: #fff; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+    
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap');
 
     .wrap { max-width: 520px; margin: 0 auto; padding: 1.5rem 1rem 2rem; position: relative; }
     
@@ -25,7 +27,7 @@
       border-radius: 1.5rem;
     }
     
-    /* Glow colors by type */
+    /* Glow colors por type - usando box-shadow */
     .wrap-glow.glow-SEO {
       box-shadow: inset 0 0 40px rgba(59,130,246,0.1), inset 0 -20px 40px rgba(59,130,246,0.08);
     }
@@ -60,6 +62,9 @@
     /* Output */
     .output-box { border-radius: 1rem; border: 1px solid #262626; padding: 1rem; background: rgba(23,23,23,0.5); margin-bottom: 1rem; transition: all 0.4s; position: relative; z-index: 1; }
     .output-box.active { background: rgba(20,20,20,0.7); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    
+    /* Glow específico por tipo - removido para usar glow global */
+    
     .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.5rem; }
     .output-name { 
       font-family: "SF Mono", "Fira Code", monospace; 
@@ -110,11 +115,90 @@
     /* History */
     .history-container { 
       margin-top: 1rem; 
-      max-height: 300px; 
-      overflow-y: auto; 
+    }
+    
+    .history-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: #111;
+      border: 1px solid #262626;
+      border-radius: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.65rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #737373;
+      border: none;
+      width: 100%;
+    }
+    
+    .history-toggle:hover {
+      border-color: #525252;
+      color: #fff;
+    }
+    
+    .history-toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex: 1;
+    }
+    
+    .history-toggle-icon {
+      display: inline-block;
+      transition: transform 0.3s;
+      font-size: 0.7rem;
+    }
+    
+    .history-toggle.expanded .history-toggle-icon {
+      transform: rotate(180deg);
+    }
+    
+    .history-list {
+      display: none;
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease-out, opacity 0.3s;
+      opacity: 0;
+    }
+    
+    .history-list.expanded {
+      display: block;
+      max-height: 120px;
+      opacity: 1;
+      margin-top: 0.5rem;
+      overflow-y: auto;
       padding-right: 6px;
     }
-    .history-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+    
+    /* Scroll styling - WebKit (Chrome, Safari, Edge) */
+    .history-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    .history-list::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .history-list::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #8b5cf6 0%, #3b82f6 100%);
+      border-radius: 3px;
+      transition: background 0.3s;
+    }
+    .history-list::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #a78bfa 0%, #60a5fa 100%);
+    }
+    
+    /* Firefox */
+    .history-list {
+      scrollbar-color: #8b5cf6 transparent;
+      scrollbar-width: thin;
+    }
+    
+    .history-header { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
     .history-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #404040; }
     .clear-history-btn { font-size: 0.65rem; padding: 0.3rem 0.6rem; border-radius: 0.5rem; border: 1px solid #262626; background: transparent; color: #737373; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
     .clear-history-btn:hover { border-color: #525252; color: #fff; }
@@ -230,6 +314,7 @@ function App() {
   const [title, setTitle] = useState("");
   const [copied, setCopied] = useState(false);
   const [clearConfirm, setClearConfirm] = useState(false);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [history, setHistory] = useState(() => {
     try {
       const saved = localStorage.getItem("naming-history");
@@ -343,137 +428,147 @@ function App() {
   }
 
   return React.createElement("div", { className: "wrap" },
-
+    
     // Glow layer
     React.createElement("div", { className: `wrap-glow ${type ? `glow-${typeKey(type)}` : ""}` }),
     
     // Content wrapper
     React.createElement("div", { className: "wrap-content" },
 
-      // Header
-      React.createElement("div", { className: "header" },
-        React.createElement("div", null,
-          React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
-          React.createElement("h1", { className: "header-title" }, "Naming Generator"),
-          React.createElement("p", { className: "header-wip" }, "Beta v0.2")
-        ),
-        type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
-      ),
-
-      // Form
+    // Header
+    React.createElement("div", { className: "header" },
       React.createElement("div", null,
+        React.createElement("p", { className: "header-eyebrow" }, "Factorial · Video"),
+        React.createElement("h1", { className: "header-title" }, "Naming Generator"),
+        React.createElement("p", { className: "header-wip" }, "Work in progress · versión de prueba")
+      ),
+      type && React.createElement("span", { className: `type-pill c-${ck}-pill` }, type)
+    ),
 
-        // Type
-        React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" }, "Type"),
-          React.createElement("div", { className: "btn-grid-3" },
-            ...TYPES.map(t => {
-              const k = typeKey(t);
-              const isActive = type === t;
-              return React.createElement("button", {
-                key: t,
-                className: `tog-btn ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
-                onClick: () => handleType(isActive ? "" : t)
-              }, t);
-            })
-          )
-        ),
+    // Form (PRIMERO)
+    React.createElement("div", null,
 
-        // Market
-        React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" }, "Market"),
-          React.createElement("div", { className: "btn-grid-6" },
-            ...MARKETS.map(m => React.createElement("button", {
-              key: m,
-              className: `tog-btn ${activeClass(m, market)}`,
-              onClick: () => setMarket(market === m ? "" : m)
-            }, m))
-          )
-        ),
-
-        // Funnel
-        hasFunnel && React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" }, "Funnel Stage"),
-          React.createElement("div", { className: "btn-row" },
-            ...FUNNELS.map(f => React.createElement(Btn, { key: f, value: f, current: funnel, onChange: setFunnel }))
-          )
-        ),
-
-        // ID
-        React.createElement("div", { className: `section btn-half` },
-          hasQuarter && React.createElement("div", null,
-            React.createElement("label", { className: "field-label" }, "Quarter"),
-            React.createElement("div", { className: "btn-row" },
-              ...QUARTERS.map(q => React.createElement("button", {
-                key: q,
-                className: `tog-btn q ${activeClass(q, quarter)}`,
-                onClick: () => setQuarter(q)
-              }, q))
-            )
-          ),
-          React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
-            React.createElement("label", { className: "field-label" }, "ID #"),
-            React.createElement("input", {
-              type: "number", min: "1", max: "99",
-              value: idNum, placeholder: "01",
-              onChange: e => setIdNum(e.target.value)
-            })
-          )
-        ),
-
-        // Title
-        React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" },
-            "Title ", React.createElement("span", null, "(optional)")
-          ),
-          React.createElement("input", {
-            type: "text", value: title, placeholder: "title-here",
-            onChange: e => setTitle(e.target.value)
-          }),
-          title.trim().includes(" ") && React.createElement("p", { className: "hyphen-preview" },
-            "→ ", React.createElement("span", null, hyphenate(title))
-          )
-        ),
-
-        // Format
-        React.createElement("div", { className: "section" },
-          React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
-          React.createElement("div", { className: "btn-row" },
-            ...(isIGC ? IGC_FORMATS : FORMATS).map(f => React.createElement(Btn, { key: f, value: f, current: format, onChange: setFormat }))
-          )
+      // Type
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Type"),
+        React.createElement("div", { className: "btn-grid-3" },
+          ...TYPES.map(t => {
+            const k = typeKey(t);
+            const isActive = type === t;
+            return React.createElement("button", {
+              key: t,
+              className: `tog-btn ${isActive ? `c-${k}-active` : `c-${k}-inactive`}`,
+              onClick: () => handleType(isActive ? "" : t)
+            }, t);
+          })
         )
       ),
 
-      // Output hero
-      React.createElement("div", {
-        className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
-      },
-        React.createElement("p", { className: "output-label" }, "Output"),
-        name
-          ? React.createElement(React.Fragment, null,
-              React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
-              React.createElement("button", {
-                className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
-                onClick: () => doCopy(name)
-              }, copied === name ? "Copied ✓" : "Copy")
-            )
-          : React.createElement("div", null,
-              React.createElement("p", { className: "output-dash" }, "––"),
-              missing.length > 0 && React.createElement("div", { className: "missing-pills" },
-                ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Missing: ${f}`))
-              )
-            )
+      // Market
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Market"),
+        React.createElement("div", { className: "btn-grid-6" },
+          ...MARKETS.map(m => React.createElement("button", {
+            key: m,
+            className: `tog-btn ${activeClass(m, market)}`,
+            onClick: () => setMarket(market === m ? "" : m)
+          }, m))
+        )
       ),
 
-      // History
-      history.length > 0 && React.createElement("div", { className: "history-container" },
-        React.createElement("div", { className: "history-header" },
-          React.createElement("p", { className: "history-label" }, "History"),
-          React.createElement("button", {
-            className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
-            onClick: clearHistoryConfirm
-          }, clearConfirm ? "Sure?" : "Clear")
+      // Funnel
+      hasFunnel && React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, "Funnel stage"),
+        React.createElement("div", { className: "btn-row" },
+          ...FUNNELS.map(f => React.createElement(Btn, { key: f, value: f, current: funnel, onChange: setFunnel }))
+        )
+      ),
+
+      // ID
+      React.createElement("div", { className: `section btn-half` },
+        hasQuarter && React.createElement("div", null,
+          React.createElement("label", { className: "field-label" }, "Quarter"),
+          React.createElement("div", { className: "btn-row" },
+            ...QUARTERS.map(q => React.createElement("button", {
+              key: q,
+              className: `tog-btn q ${activeClass(q, quarter)}`,
+              onClick: () => setQuarter(q)
+            }, q))
+          )
         ),
+        React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
+          React.createElement("label", { className: "field-label" }, "ID #"),
+          React.createElement("input", {
+            type: "number", min: "1", max: "99",
+            value: idNum, placeholder: "01",
+            onChange: e => setIdNum(e.target.value)
+          })
+        )
+      ),
+
+      // Title
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" },
+          "Title ", React.createElement("span", null, "(opcional)")
+        ),
+        React.createElement("input", {
+          type: "text", value: title, placeholder: "title-here",
+          onChange: e => setTitle(e.target.value)
+        }),
+        title.trim().includes(" ") && React.createElement("p", { className: "hyphen-preview" },
+          "→ ", React.createElement("span", null, hyphenate(title))
+        )
+      ),
+
+      // Format
+      React.createElement("div", { className: "section" },
+        React.createElement("label", { className: "field-label" }, isIGC ? "IGC Format" : "Format"),
+        React.createElement("div", { className: "btn-row" },
+          ...(isIGC ? IGC_FORMATS : FORMATS).map(f => React.createElement(Btn, { key: f, value: f, current: format, onChange: setFormat }))
+        )
+      )
+    ),
+
+    // Output hero (AL FINAL, ANTES DEL HISTORIAL)
+    React.createElement("div", {
+      className: `output-box ${name ? "active" : ""} ${name && ck ? `c-${ck}-border c-${ck}-glow` : ""}`
+    },
+      React.createElement("p", { className: "output-label" }, "Output"),
+      name
+        ? React.createElement(React.Fragment, null,
+            React.createElement("p", { className: `output-name ${anim ? "animating" : ""}` }, displayed),
+            React.createElement("button", {
+              className: `copy-btn ${copied === name ? "done" : ""} ${ck ? `c-${ck}-active` : "c-default-active"}`,
+              onClick: () => doCopy(name)
+            }, copied === name ? "Copied ✓" : "Copy")
+          )
+        : React.createElement("div", null,
+            React.createElement("p", { className: "output-dash" }, "––"),
+            missing.length > 0 && React.createElement("div", { className: "missing-pills" },
+              ...missing.map(f => React.createElement("span", { className: "missing-pill", key: f }, `Missing: ${f}`))
+            )
+          )
+    ),
+
+    // History (COLAPSADO POR DEFECTO)
+    history.length > 0 && React.createElement("div", { className: "history-container" },
+      React.createElement("button", {
+        className: `history-toggle ${historyExpanded ? "expanded" : ""}`,
+        onClick: () => setHistoryExpanded(!historyExpanded)
+      },
+        React.createElement("div", { className: "history-toggle-label" },
+          React.createElement("span", { className: "history-label" }, `History (${history.length})`),
+          React.createElement("span", { className: "history-toggle-icon" }, "▼")
+        ),
+        React.createElement("button", {
+          className: `clear-history-btn ${clearConfirm ? "warning" : ""}`,
+          onClick: (e) => {
+            e.stopPropagation();
+            clearHistoryConfirm();
+          }
+        }, clearConfirm ? "Sure?" : "Clear")
+      ),
+      React.createElement("div", { className: `history-list ${historyExpanded ? "expanded" : ""}` },
         ...history.map((h, i) => React.createElement("div", { key: i, className: "history-item" },
           React.createElement("p", { className: "history-name" }, h),
           React.createElement("button", {
@@ -482,6 +577,7 @@ function App() {
           }, copied === h ? "✓" : "Copy")
         ))
       )
+    )
     ) // Cierre de wrap-content
   );
 }
