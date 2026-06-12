@@ -271,7 +271,7 @@ const { useState, useEffect, useRef } = React;
 
 const TYPES = ["SEO", "IGC", "PLWC", "SoMe", "AI ACT", "Screen Studio"];
 const MARKETS = ["ES", "PT", "FR", "DE", "IT", "ROW"];
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbyQ_sGLttfjYmZqMBPikzei3dTcdW3GZeDThAn2ponDI7I-jokZ_AAeI2_KAyIkGYzX/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzT4DuVNyXtXVVMDO8LO_WNHsxRG05-y35I9w4gzJNpueK69ryxMd8-fj6UqV0zO0LG/exec";
 const FORMATS = ["YTB", "IG", "LinkedIn"];
 const IGC_FORMATS = ["LG", "MF", "SF", "PAID"];
 const FUNNELS = ["TOFU", "MOFU", "BOFU"];
@@ -358,6 +358,9 @@ function App() {
   function syncToSheet(n) {
     const payload = new URLSearchParams();
     payload.append("name", n);
+    payload.append("type", type);
+    payload.append("market", market);
+    payload.append("format", format);
     
     fetch(SHEET_URL, {
       method: "POST",
