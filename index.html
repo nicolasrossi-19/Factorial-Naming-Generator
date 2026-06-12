@@ -165,7 +165,19 @@ function App() {
   const [idNum, setIdNum] = useState("1");
   const [title, setTitle] = useState("");
   const [copied, setCopied] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState(() => {
+  try {
+    const saved = localStorage.getItem("naming-history");
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    return [];
+  }
+});
+  useEffect(() => {
+  try {
+    localStorage.setItem("naming-history", JSON.stringify(history));
+  } catch (e) {}
+}, [history]);
 
   const hasQuarter = QUARTER_TYPES.includes(type);
   const hasFunnel = type === "SEO";
