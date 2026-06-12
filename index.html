@@ -330,17 +330,26 @@ function App() {
   const isIGC = type === "IGC";
   const ck = type ? typeKey(type) : null;
 
-  function handleType(t) { setType(t); setFunnel(""); setFormat(""); }
+  function handleType(t) { setType(t); setFunnel(""); setFormat(""); setIdNum(""); }
 
   function buildName() {
     if (!type || !market || !format) return null;
-    const id = hasQuarter ? `${quarter}-${pad(parseInt(idNum)||1)}` : pad(parseInt(idNum)||1);
     const t = title.trim() ? hyphenate(title) : "title-here";
     const out = TYPE_OUTPUT[type] || type;
     const parts = [out, market];
-    if (hasFunnel && funnel) parts.push(funnel);
-    parts.push(`${id}_${t}`);
-    parts.push(format);
+    
+    if (type === "IGC") {
+      // IGC: sin ID, con versión al final
+      const version = idNum.trim() || "v00";
+      parts.push(`${t}_${format}_${version}`);
+    } else {
+      // Resto de tipos con ID
+      if (!idNum) return null;
+      const id = hasQuarter ? `${quarter}-${pad(parseInt(idNum)||1)}` : pad(parseInt(idNum)||1);
+      parts.push(`${id}_${t}`);
+      parts.push(format);
+    }
+    
     return parts.join("_");
   }
 
@@ -351,6 +360,9 @@ function App() {
   if (!type) missing.push("type");
   if (!market) missing.push("market");
   if (!format) missing.push("format");
+  if (hasFunnel && !funnel) missing.push("funnel");
+  if (hasQuarter && !quarter) missing.push("quarter");
+  // IGC no requiere ID
 
   function syncToSheet(n) {
     const payload = new URLSearchParams();
@@ -500,8 +512,8 @@ function App() {
           )
         ),
 
-        // ID
-        React.createElement("div", { className: `section btn-half` },
+        // ID / Version
+        (hasQuarter || (hasId && type !== "IGC")) && React.createElement("div", { className: `section btn-half` },
           hasQuarter && React.createElement("div", null,
             React.createElement("label", { className: "field-label" }, "Quarter"),
             React.createElement("div", { className: "btn-row" },
@@ -512,7 +524,7 @@ function App() {
               }, q))
             )
           ),
-          React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
+          (hasId && type !== "IGC") && React.createElement("div", { style: hasQuarter ? {} : { gridColumn: "1" } },
             React.createElement("label", { className: "field-label" }, "ID #"),
             React.createElement("input", {
               type: "number", min: "1", max: "99",
@@ -520,6 +532,15 @@ function App() {
               onChange: e => setIdNum(e.target.value)
             })
           )
+        ),
+
+        // IGC Version
+        isIGC && React.createElement("div", { className: "section" },
+          React.createElement("label", { className: "field-label" }, "Version #"),
+          React.createElement("input", {
+            type: "text", value: idNum, placeholder: "v00",
+            onChange: e => setIdNum(e.target.value)
+          })
         ),
 
         // Title
