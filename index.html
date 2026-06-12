@@ -8,7 +8,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #0a0a0a; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
+    body { background: #191919; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; }
 
     .wrap { max-width: 520px; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
 
@@ -21,7 +21,7 @@
 
     /* Output */
     .output-box { border-radius: 1rem; border: 1px solid #262626; padding: 1.5rem; background: rgba(23,23,23,0.5); margin-bottom: 1.5rem; transition: all 0.4s; }
-    .output-box.active { background: #171717; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
+    .output-box.active { background: #202020; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); }
     .output-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.12em; color: #525252; margin-bottom: 0.75rem; }
     .output-name { font-family: "SF Mono", "Fira Code", monospace; font-size: 1.05rem; color: #fff; word-break: break-all; line-height: 1.6; transition: opacity 0.15s, transform 0.15s; }
     .output-name.animating { opacity: 0; transform: translateY(4px); }
@@ -195,12 +195,21 @@ function App() {
   if (!format) missing.push("format");
 
   function doCopy(n) {
-    navigator.clipboard.writeText(n).then(() => {
-      setCopied(n);
-      if (n === name && !history.includes(n)) setHistory(h => [n, ...h].slice(0, 5));
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
+  const ta = document.createElement("textarea");
+  ta.value = n;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
+  } catch (e) {}
+  document.body.removeChild(ta);
+
+  setCopied(n);
+  if (n === name && !history.includes(n)) setHistory(h => [n, ...h].slice(0, 5));
+  setTimeout(() => setCopied(false), 2000);
+}
 
   function activeClass(val, cur) { return val === cur ? `c-${ck||"default"}-active` : `c-${ck||"default"}-inactive`; }
 
